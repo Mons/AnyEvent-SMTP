@@ -16,7 +16,7 @@ sub import {
 			*{$pkg.'::'.$_} = \&AnyEvent::SMTP::Server::smtp_server;
 		}
 		else {
-			croak "$_ is not exported by $me";
+			require Carp; Carp::croak "$_ is not exported by $me";
 		}
 	}
 }
@@ -27,11 +27,11 @@ AnyEvent::SMTP - SMTP client and server
 
 =head1 VERSION
 
-Version 0.01_1
+Version 0.01
 
 =cut
 
-our $VERSION = '0.01_1';
+our $VERSION = '0.01';
 
 
 =head1 SYNOPSIS

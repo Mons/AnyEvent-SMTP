@@ -4,31 +4,45 @@
 use strict;
 use warnings;
 use AnyEvent;
+use AnyEvent::Socket;
+
 use lib::abs '../lib';
+
 use Test::More;
 BEGIN {
 	eval { require Test::SMTP;1 } or plan skil_all => 'Test::SMTP required';
 }
+use AnyEvent::SMTP::Server 'smtp_server';
 
-our $port = 1024 + $$  % (65535-1024) ;
-$SIG{INT} = $SIG{TERM} = sub {exit 1};
+our $port = 1024 + $$ % (65535-1024) ;
+our $ready = 0;
+$SIG{INT} = $SIG{TERM} = sub { exit 0 };
 
 our $child;
 unless($child = fork) {
-
-    use AnyEvent::SMTP::Server 'smtp_server';
-    use Data::Dumper;
-
-    my $cv = AnyEvent->condvar;
-
-    smtp_server undef, $port, sub {
-        warn "MAIL=".Dumper shift;
-    };
-
-    $cv->recv;
-    exit 0;
+	# Start server and wait for connections
+	my $cv = AnyEvent->condvar;
+	my $req = 2;
+	smtp_server undef, $port, sub {};
+	$cv->recv;
 } else {
-    sleep 1;
+	# Wait for server to start
+	my $cv = AnyEvent->condvar;
+	my ($conn,$cg);
+	$cv->begin(sub {
+		undef $conn;
+		undef $cg;
+		$cv->send;
+	});
+	$conn = sub {
+		$cg = tcp_connect '127.0.0.1',$port, sub {
+			#warn "Conn @_";
+			return $cv->end if @_;
+			$conn->();
+		};
+	};
+	$conn->();
+	$cv->recv;
 }
 
 plan tests => 13;
@@ -56,5 +70,10 @@ for (['S1', Host => 'localhost:'.$port, AutoHello => 1]) {
 }
 
 END {
-    $child and kill TERM => $child;
+	if ($child) {
+		#warn "Killing child $child";
+		$child and kill TERM => $child or warn "$!";
+		waitpid($child,0);
+		exit 0;
+	}
 }

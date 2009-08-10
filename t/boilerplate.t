@@ -1,8 +1,11 @@
-#!perl -T
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
 use Test::More tests => 3;
+use lib::abs;
+my $dist = lib::abs::path('..');
+chdir $dist or plan skip_all => "Can't chdir to $dist: $!";
 
 sub not_in_file_ok {
     my ($filename, %regex) = @_;

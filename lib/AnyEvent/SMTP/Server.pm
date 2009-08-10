@@ -282,7 +282,7 @@ sub start {
 		}
 		$self->accept_connection(@_);
 	};
-	print "Server started on port $self->{port}\n";
+	warn "Server started on port $self->{port}\n" if $self->{debug};
 }
 
 sub accept_connection {
@@ -292,7 +292,7 @@ sub accept_connection {
 		fh => $fh,
 		host => $host,
 		port => $port,
-		#debug => 1,
+		debug => $self->{debug},
 	);
 	$self->{c}{int $con} = $con;
 	$con->reg_cb(

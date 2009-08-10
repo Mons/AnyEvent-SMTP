@@ -6,7 +6,6 @@ AnyEvent::SMTP::Client - Simple asyncronous SMTP Client
 
 =cut
 
-use Carp;
 use AnyEvent; BEGIN { AnyEvent::common_sense }
 #use strict;
 #use warnings;
@@ -68,6 +67,10 @@ SMTP server to use. Optional. By default will be resolved MX record
 =item port => 2525
 
 SMTP server port. Optional. By default = 25
+
+=item server => 'some.server:25'
+
+SMTP server. The same as pair of host:port
 
 =item helo => 'hostname'
 
@@ -137,7 +140,7 @@ sub import {
 		if ( $_ eq 'sendmail') {
 			*{$pkg.'::'.$_} = \&$_;
 		} else {
-			croak "$_ is not exported by $me";
+			require Carp; Carp::croak "$_ is not exported by $me";
 		}
 	}
 }
@@ -148,7 +151,13 @@ sub sendmail(%) {
 	@args{map lc, @keys} = delete @args{ @keys };
 	$args{data} ||= delete $args{message} || delete $args{body};
 	$args{helo} ||= hostname();
+	if ($args{server}) {
+		my ($h,$p) = $args{server} =~ /^([^:]+)(?:|:(\d+))$/;
+		$args{host} = $h or return $args{cb}(undef,"Bad option value for `server'");
+		$args{port} = $p if defined $p;
+	}
 	$args{port} ||= 25;
+	$args{timeout} ||= 30;
 
 	my ($run,$cv,$res,$err);
 	$args{cv}->begin if $args{cv};
@@ -156,7 +165,6 @@ sub sendmail(%) {
 	my $end = sub{
 		undef $run;
 		undef $cv;
-		undef $end;
 		$args{cb}( $res, defined $err ? $err : () );
 		$args{cv}->end if $args{cv};
 		%args = ();
@@ -230,7 +238,7 @@ sub sendmail(%) {
 
 				});
 			});
-		};
+		}, sub { $args{timeout} || 30 };
 		
 	};
 	

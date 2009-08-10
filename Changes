@@ -1,5 +1,9 @@
 Revision history for AnyEvent-SMTP
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+TODO: More documentation for Server
+TODO: More capabilities for Client
+TODO: Authorization for Client
+TODO: TLS
 
+0.01    2009-08-10
+        First version, Beta

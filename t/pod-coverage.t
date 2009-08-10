@@ -1,18 +1,29 @@
+#!/usr/bin/env perl -w
+
 use strict;
-use warnings;
 use Test::More;
+use lib::abs "../lib";
 
 # Ensure a recent version of Test::Pod::Coverage
-my $min_tpc = 1.08;
-eval "use Test::Pod::Coverage $min_tpc";
-plan skip_all => "Test::Pod::Coverage $min_tpc required for testing POD coverage"
-    if $@;
+eval "use Test::Pod::Coverage 1.08; 1"
+	or plan skip_all => "Test::Pod::Coverage 1.08 required for testing POD coverage";
+eval "use Pod::Coverage 0.18; 1"
+	or plan skip_all => "Pod::Coverage 0.18 required for testing POD coverage";
 
-# Test::Pod::Coverage doesn't require a minimum Pod::Coverage version,
-# but older versions don't recognize some common documentation styles
-my $min_pc = 0.18;
-eval "use Pod::Coverage $min_pc";
-plan skip_all => "Pod::Coverage $min_pc required for testing POD coverage"
-    if $@;
+my $lib = lib::abs::path( "../lib" );
+my $blib = lib::abs::path( "../blib" );
+#local *Test::Pod::Coverage::_starting_points = sub { -e $blib ? $blib : $lib };
+#my @mods = all_modules( lib::abs::path( "../lib" ) );
 
-all_pod_coverage_ok();
+plan tests => 2;
+
+pod_coverage_ok(
+	'AnyEvent::SMTP::Server',
+	{ also_private => [ qr/^(?:accept_connection|eventif|eventcan|handle)$/ ], },
+);
+pod_coverage_ok(
+	'AnyEvent::SMTP::Client',
+);
+
+exit 0;
+require Test::Pod::Coverage; # ;)
