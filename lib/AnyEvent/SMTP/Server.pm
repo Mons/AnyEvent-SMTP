@@ -153,7 +153,7 @@ sub smtp_server {
 sub new {
 	my $pkg = shift;
 	my $self = bless { @_ }, $pkg;
-	$self->{hostname} //= hostname();
+	$self->{hostname} = hostname() unless defined $self->{hostname};
 	$self->set_exception_cb( sub {
 		my ($e, $event, @args) = @_;
 		my $con;

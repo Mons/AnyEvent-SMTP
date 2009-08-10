@@ -10,7 +10,7 @@ use lib::abs '../lib';
 
 use Test::More;
 BEGIN {
-	eval { require Test::SMTP;1 } or plan skil_all => 'Test::SMTP required';
+	eval { require Test::SMTP;1 } or plan skip_all => 'Test::SMTP required';
 }
 use AnyEvent::SMTP::Server 'smtp_server';
 

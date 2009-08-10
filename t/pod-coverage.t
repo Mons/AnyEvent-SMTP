@@ -4,6 +4,7 @@ use strict;
 use Test::More;
 use lib::abs "../lib";
 
+$ENV{TEST_AUTHOR} or plan skip_all => '$ENV{TEST_AUTHOR} not set';
 # Ensure a recent version of Test::Pod::Coverage
 eval "use Test::Pod::Coverage 1.08; 1"
 	or plan skip_all => "Test::Pod::Coverage 1.08 required for testing POD coverage";

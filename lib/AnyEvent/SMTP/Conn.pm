@@ -46,7 +46,7 @@ sub command {
 	my $self = shift;
 	my $write = shift;
 	my %args = @_;
-	$args{ok} //= '250';
+	$args{ok} = '250' unless defined $args{ok};
 	$args{cb} or return $self->event( error => "no cb for command at @{[ (caller)[1,2] ]}" );
 	$self->{h} or return $args{cb}->(undef,"Not connected");
 	#my $i if 0;
@@ -75,7 +75,7 @@ sub command {
 sub line {
 	my $self = shift;
 	my %args = @_;
-	$args{ok} //= '250';
+	$args{ok} = '250' unless defined $args{ok};
 	$args{cb} or return $self->event( error => "no cb for command at @{[ (caller)[1,2] ]}" );
 	warn "<? read  " if $self->{debug};
 	$self->{h}->push_read( regex => $QRNL, sub {
