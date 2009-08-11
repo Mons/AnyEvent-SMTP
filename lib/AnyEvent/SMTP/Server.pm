@@ -7,7 +7,8 @@ AnyEvent::SMTP::Server - Simple asyncronous SMTP Server
 =cut
 
 use Carp;
-use AnyEvent; BEGIN { AnyEvent::common_sense }
+use AnyEvent;
+use common::sense;
 #use strict;
 #use warnings;
 
@@ -21,6 +22,9 @@ use Sys::Hostname;
 use Mail::Address;
 
 use AnyEvent::SMTP::Conn;
+
+use AnyEvent::SMTP ();
+our $VERSION = $AnyEvent::SMTP::VERSION;
 
 our %CMD = map { $_ => 1 } qw( HELO EHLO MAIL RCPT QUIT DATA EXPN VRFY NOOP HELP RSET );
 
@@ -220,19 +224,23 @@ sub new {
 			$con->ok;
 		},
 		MAIL => sub {
-			my ($s,$con,$from,@args) = @_;
+			my ($s,$con,@args) = @_;
+			my $from = join ' ',@args;
+			$from =~ s{^from:}{}i or $con->reply('501 Usage: MAIL FROM:<mail addr>');
 			$con->{helo} or return $con->reply("503 Error: send HELO/EHLO first");
-			my @addrs = map { $_->address } Mail::Address->parse("@args");
-			lc $from eq 'from:' and @addrs == 1 or $con->reply('501 Usage: MAIL FROM: mail addr');
+			my @addrs = map { $_->address } Mail::Address->parse($from);
+			@addrs == 1 or $con->reply('501 Usage: MAIL FROM:<mail addr>');
 			$con->{m}{from} = $addrs[0];
 			$con->ok;
 		},
 		RCPT => sub {
-			my ($s,$con,$to,@args) = @_;
+			my ($s,$con,@args) = @_;
+			my $to = join ' ',@args;
+			$to =~ s{^to:}{}i or $con->reply('501 Usage: RCPT TO:<mail addr>');
 			$con->{m}{from} or return $con->reply("503 Error: need MAIL command");
-			my @addrs = map { $_->address } Mail::Address->parse("@args");
-			lc $to eq 'to:' and @addrs or $con->reply('501 Usage: RCPT TO: mail addr');
-			push @{ $con->{m}{to} ||= [] }, @addrs;
+			my @addrs = map { $_->address } Mail::Address->parse($to);
+			@addrs or $con->reply('501 Usage: RCPT TO:<mail addr>');
+			push @{ $con->{m}{to} ||= [] }, $addrs[0];
 			$con->ok;
 		},
 		DATA => sub {

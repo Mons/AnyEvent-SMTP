@@ -3,6 +3,10 @@
 use strict;
 use Test::More;
 use lib::abs "../lib";
+BEGIN {
+	my $lib = lib::abs::path( ".." );
+	chdir $lib or plan skip_all => "Can't chdir to dist $lib";
+}
 
 $ENV{TEST_AUTHOR} or plan skip_all => '$ENV{TEST_AUTHOR} not set';
 # Ensure a recent version of Test::Pod::Coverage
@@ -11,12 +15,7 @@ eval "use Test::Pod::Coverage 1.08; 1"
 eval "use Pod::Coverage 0.18; 1"
 	or plan skip_all => "Pod::Coverage 0.18 required for testing POD coverage";
 
-my $lib = lib::abs::path( "../lib" );
-my $blib = lib::abs::path( "../blib" );
-#local *Test::Pod::Coverage::_starting_points = sub { -e $blib ? $blib : $lib };
-#my @mods = all_modules( lib::abs::path( "../lib" ) );
-
-plan tests => 2;
+plan tests => 3;
 
 pod_coverage_ok(
 	'AnyEvent::SMTP::Server',
@@ -24,6 +23,10 @@ pod_coverage_ok(
 );
 pod_coverage_ok(
 	'AnyEvent::SMTP::Client',
+);
+
+pod_coverage_ok(
+	'AnyEvent::SMTP',
 );
 
 exit 0;

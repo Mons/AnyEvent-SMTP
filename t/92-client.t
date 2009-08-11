@@ -84,9 +84,8 @@ sendmail
 	data   => 'body',
 	cv     => $cv,
 	cb     => sub {
-		like $_[1], qr/Operation timed out/, 'E Timeout'
-			or diag "  OK?: $_[0]";
-		
+		ok $_[1], 'Error on bad host: '.$_[1];
+		diag "OK = $_[0]" if $_[0];
 	};
 
 }

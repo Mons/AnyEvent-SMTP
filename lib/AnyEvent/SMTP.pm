@@ -1,6 +1,7 @@
 package AnyEvent::SMTP;
 
-use AnyEvent; BEGIN { AnyEvent::common_sense }
+use AnyEvent;
+use common::sense;
 
 sub import {
 	my $me = shift;
@@ -27,11 +28,11 @@ AnyEvent::SMTP - SMTP client and server
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS

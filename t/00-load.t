@@ -1,13 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
 use Test::More;
-use Module::Find;
 use lib::abs '../lib';
 BEGIN {
-	setmoduledirs( $INC[0] );
-	my @modules = grep { !/^TODO$/ } findallmod 'AnyEvent';
+	my @modules = qw(AnyEvent::SMTP AnyEvent::SMTP::Client AnyEvent::SMTP::Server);
 	plan tests => scalar( @modules );
 	use_ok $_ for @modules;
 };

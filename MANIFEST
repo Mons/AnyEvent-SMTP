@@ -29,6 +29,5 @@ t/91-server-func.t
 t/92-client.t
 t/98-fixme.t
 t/99-kwalitee.t
-t/boilerplate.t
 t/pod-coverage.t
 t/pod.t

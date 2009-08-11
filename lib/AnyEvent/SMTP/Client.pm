@@ -6,7 +6,8 @@ AnyEvent::SMTP::Client - Simple asyncronous SMTP Client
 
 =cut
 
-use AnyEvent; BEGIN { AnyEvent::common_sense }
+use AnyEvent;
+use common::sense;
 #use strict;
 #use warnings;
 
@@ -21,6 +22,9 @@ use Sys::Hostname;
 use Mail::Address;
 
 use AnyEvent::SMTP::Conn;
+
+use AnyEvent::SMTP ();
+our $VERSION = $AnyEvent::SMTP::VERSION;
 
 =head1 SYNOPSIS
 
@@ -209,7 +213,7 @@ sub sendmail(%) {
 				shift or return $cb->(undef, @_);
 				$con->command("HELO $args{helo}", ok => 250, cb => sub {
 					shift or return $cb->(undef, @_);
-					$con->command("MAIL FROM: <$args{from}>", ok => 250, cb => sub {
+					$con->command("MAIL FROM:<$args{from}>", ok => 250, cb => sub {
 						shift or return $cb->(undef, @_);
 
 						my $cv1 = AnyEvent->condvar;
@@ -227,7 +231,7 @@ sub sendmail(%) {
 
 						for ( @to ) {
 							$cv1->begin;
-							$con->command("RCPT TO: <$_>", ok => 250, cb => sub {
+							$con->command("RCPT TO:<$_>", ok => 250, cb => sub {
 								shift or return $cb->(undef, @_);
 								$cv1->end;
 							});

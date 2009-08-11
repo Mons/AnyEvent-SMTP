@@ -5,5 +5,15 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.03    2009-08-11
+        * Fixes rt.cpan.org #48586 (tnx: Marc Lehmann)
+          - fix "mail from: <addr>" => "mail from:<addr>" 
+          - fix "rcpt to: <addr>" => "rcpt to:<addr>"
+          - replace dependency on AnyEvent::common_sense() with use common::sense;
+        * 
+
+0.02    2009-08-10
+        Fix failed tests
+
 0.01    2009-08-10
         First version, Beta

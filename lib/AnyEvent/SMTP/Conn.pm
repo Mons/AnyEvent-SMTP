@@ -1,10 +1,14 @@
 package AnyEvent::SMTP::Conn;
 
-use AnyEvent; BEGIN { AnyEvent::common_sense }
+use AnyEvent;
+use common::sense;
 #use strict;
 #use warnings;
 use base 'Object::Event';
 use AnyEvent::Handle;
+
+use AnyEvent::SMTP ();
+our $VERSION = $AnyEvent::SMTP::VERSION;
 
 our $NL = "\015\012";
 our $QRNL = qr<\015?\012>;
