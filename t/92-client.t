@@ -3,6 +3,7 @@
 
 use strict;
 use warnings;
+use AnyEvent::Impl::Perl;
 use AnyEvent;
 use AnyEvent::Socket;
 
@@ -34,7 +35,8 @@ unless($child = fork) {
 	$conn = sub {
 		$cg = tcp_connect '127.0.0.1',$port, sub {
 			return $cv->end if @_;
-			$conn->();
+			$! == 61 or plan skip_all => "Bad response from server connect: $!"; 
+			my $t;$t = AnyEvent->timer( after => 0.05, cb => sub { undef $t; $conn->() } );
 		};
 	};
 	$conn->();

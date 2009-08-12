@@ -5,6 +5,10 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.04    2009-08-12
+        * Use Impl::Perl in tests
+        * Fix tests
+
 0.03    2009-08-11
         * Fixes rt.cpan.org #48586 (thanks to Marc Lehmann)
           - fix "mail from: <addr>" => "mail from:<addr>" 
