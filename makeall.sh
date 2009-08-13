@@ -15,9 +15,10 @@ $perl -i -lne 'print unless /(?:\.tar\.gz$|^dist)/' MANIFEST && \
 make clean && \
 $perl Makefile.PL && \
 make && \
-TEST_AUTHOR=1 NET_TEST=1 make test && \
+PERL_ANYEVENT_STRICT=1 TEST_AUTHOR=1 NET_TEST=1 make test && \
 make disttest && \
 make dist && \
 cp -f *.tar.gz dist/ && \
 make clean && \
+rm -rf MANIFEST.bak Makefile.old && \
 echo "All is OK"

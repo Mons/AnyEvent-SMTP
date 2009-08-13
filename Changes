@@ -5,6 +5,11 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.05    2009-08-13
+        * Add connection limits to Client
+        * Add global vars to inform about activity
+        * More tests
+
 0.04    2009-08-12
         * Use Impl::Perl in tests
         * Fix tests

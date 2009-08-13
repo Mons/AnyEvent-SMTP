@@ -26,6 +26,60 @@ use AnyEvent::SMTP::Conn;
 use AnyEvent::SMTP ();
 our $VERSION = $AnyEvent::SMTP::VERSION;
 
+
+# vvv This code was partly derived from AnyEvent::HTTP vvv
+our $MAXCON = 10; # Maximum number of connections to any host
+our %MAXCON;      # Maximum number of connections to concrete host
+our $ACTIVE = 0;  # Currently active connections
+our %ACTIVE;
+my %CO_SLOT;      # number of open connections, and wait queue, per host
+
+sub _slot_schedule;
+sub _slot_schedule($) {
+	my $host = shift;
+	my $mc = exists $MAXCON{$host} ? $MAXCON{$host} : $MAXCON;
+	while (!$mc or ( $mc > 0 and $CO_SLOT{$host}[0] < $mc )) {
+		if (my $cb = shift @{ $CO_SLOT{$host}[1] }) {
+			# somebody wants that slot
+			++$CO_SLOT{$host}[0];
+			++$ACTIVE;
+			++$ACTIVE{$host};
+			$cb->(AnyEvent::Util::guard {
+				--$ACTIVE;
+				--$ACTIVE{$host} > 0 or delete $ACTIVE{$host};
+				--$CO_SLOT{$host}[0];
+				#warn "Release slot (have $ACTIVE) by @{[ (caller)[1,2] ]}\n";
+				_slot_schedule $host;
+			});
+		} else {
+			# nobody wants the slot, maybe we can forget about it
+			delete $CO_SLOT{$host} unless $CO_SLOT{$host}[0];
+			last;
+		}
+	}
+}
+
+# wait for a free slot on host, call callback
+sub _get_slot($$) {
+	push @{ $CO_SLOT{$_[0]}[1] }, $_[1];
+	_slot_schedule $_[0];
+}
+
+sub _tcp_connect($$$;$) {
+	my ($host,$port,$cb,$pr) = @_;
+	#warn "Need slot $host (have $ACTIVE)";
+	_get_slot $host, sub {
+		my $sg = shift;
+		#warn "Have slot $host (have $ACTIVE)";
+		tcp_connect($host,$port,sub {
+			$cb->(@_,$sg);
+		}, $pr);
+	}
+}
+# ^^^ This code was partly derived from AnyEvent::HTTP ^^^
+
+
+
 =head1 SYNOPSIS
 
     use AnyEvent::SMTP::Client 'sendmail';
@@ -133,6 +187,37 @@ is the same as
 
 =back
 
+=head1 VARIABLES
+
+=head2 $MAXCON [ = 10]
+
+Maximum number of connections to any host. Default is 10
+
+=head2 %MAXCON
+
+Per-host configuration for maximum number of connection
+
+Please note, host is hostname passed in argument, or resolved MX record.
+
+So, if passed C<host => 'localhost'>, should be used C<$MAXCON{localhost}>, if passed C<host => '127.0.0.1'>, should be used C<$MAXCON{'127.0.0.1'}>
+
+	# set default limit to 20
+	$AnyEvent::SMTP::Client::MAXCON = 20;
+	
+	# don't limit localhost connections
+	$AnyEvent::SMTP::Client::MAXCON{'localhost'} = 0;
+	
+	# big limit for one of gmail MX
+	$AnyEvent::SMTP::Client::MAXCON{'gmail-smtp-in.l.google.com.'} = 100;
+
+=head2 $ACTIVE
+
+Number of currently active connections
+
+=head2 %ACTIVE
+
+Number of currently active connections per host
+
 =cut
 
 sub import {
@@ -180,10 +265,11 @@ sub sendmail(%) {
 	$run = sub {
 		my ($host,$port,@to) = @_;
 		warn "connecting to $host:$port\n" if $args{debug};
-		my ($exc,$con);
+		my ($exc,$con,$slot_guard);
 		my $cb = sub {
 			undef $exc;
 			$con and $con->close;
+			undef $slot_guard;
 			undef $con;
 			if (@rcpt > 1) {
 				#warn "multi cb @to: @_";
@@ -199,7 +285,8 @@ sub sendmail(%) {
 			$cv->end;
 		};
 		$cv->begin;
-		tcp_connect $host,$port,sub {
+		_tcp_connect $host,$port,sub {
+			$slot_guard = pop;
 			my $fh = shift
 				or return $cb->(undef, "$!");
 			$con = AnyEvent::SMTP::Conn->new( fh => $fh, debug => $args{debug}, timeout => $args{timeout} );

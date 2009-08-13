@@ -2,7 +2,7 @@ NAME
     AnyEvent::SMTP - SMTP client and server
 
 VERSION
-    Version 0.04
+    Version 0.05
 
 SYNOPSIS
         use AnyEvent::SMTP 'sendmail';
