@@ -70,8 +70,8 @@ sendmail
 	data   => 'body',
 	cv     => $cv,
 	cb     => sub {
-		like $_[1], qr/Connection refused/, 'E Connection refused'
-			or diag "  OK?: $_[0]";
+		ok $_[1], 'Error on bad port: '.$_[1];
+		diag "OK = $_[0]" if $_[0];
 		
 	};
 
