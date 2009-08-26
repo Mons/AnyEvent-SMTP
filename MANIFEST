@@ -31,6 +31,8 @@ t/51-slots-maxcon-host.t
 t/52-slots-maxcon-unlim.t
 t/53-slots-active.t
 t/90-examples.t
+t/96-metayml.t
+t/97-changes.t
 t/98-fixme.t
 t/99-kwalitee.t
 t/pod-coverage.t

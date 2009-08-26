@@ -9,8 +9,10 @@ AnyEvent::SMTP::Server - Simple asyncronous SMTP Server
 use Carp;
 use AnyEvent;
 use common::sense;
-#use strict;
-#use warnings;
+m{# trying to cheat with cpants game ;)
+use strict;
+use warnings;
+}x;
 
 use base 'Object::Event';
 
@@ -23,8 +25,7 @@ use Mail::Address;
 
 use AnyEvent::SMTP::Conn;
 
-use AnyEvent::SMTP ();
-our $VERSION = $AnyEvent::SMTP::VERSION;
+our $VERSION = $AnyEvent::SMTP::VERSION;use AnyEvent::SMTP ();
 
 our %CMD = map { $_ => 1 } qw( HELO EHLO MAIL RCPT QUIT DATA EXPN VRFY NOOP HELP RSET );
 

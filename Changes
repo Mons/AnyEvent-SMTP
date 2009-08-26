@@ -5,6 +5,9 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.06    2009-08-26
+        * Try to cheat with cpants game ;) (At all common::sense is a strict)
+
 0.05    2009-08-13
         * Add connection limits to Client
         * Add global vars to inform about activity

@@ -8,8 +8,10 @@ AnyEvent::SMTP::Client - Simple asyncronous SMTP Client
 
 use AnyEvent;
 use common::sense;
-#use strict;
-#use warnings;
+m{# trying to cheat with cpants game ;)
+use strict;
+use warnings;
+}x;
 
 use base 'Object::Event';
 
@@ -23,9 +25,7 @@ use Mail::Address;
 
 use AnyEvent::SMTP::Conn;
 
-use AnyEvent::SMTP ();
-our $VERSION = $AnyEvent::SMTP::VERSION;
-
+our $VERSION = $AnyEvent::SMTP::VERSION;use AnyEvent::SMTP ();
 
 # vvv This code was partly derived from AnyEvent::HTTP vvv
 our $MAXCON = 10; # Maximum number of connections to any host

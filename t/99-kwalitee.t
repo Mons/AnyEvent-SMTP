@@ -4,11 +4,11 @@ use strict;
 use Test::More;
 use lib::abs "../lib";
 
-$ENV{TEST_AUTHOR} or plan skip_all => '$ENV{TEST_AUTHOR} not set';
+#$ENV{TEST_AUTHOR} or plan skip_all => '$ENV{TEST_AUTHOR} not set';
 
 my $dist = lib::abs::path('..');
 chdir $dist or plan skip_all => "Can't chdir to $dist: $!";
-eval { require Test::Kwalitee; Test::Kwalitee->import( tests => [ -use_strict ], basedir => $dist) };
+eval { require Test::Kwalitee; Test::Kwalitee->import( basedir => $dist) };
 plan( skip_all => 'Test::Kwalitee not installed; skipping' ) if $@;
 
 END {

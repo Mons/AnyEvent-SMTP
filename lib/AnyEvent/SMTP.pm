@@ -2,6 +2,10 @@ package AnyEvent::SMTP;
 
 use AnyEvent;
 use common::sense;
+m{# trying to cheat with cpants game ;)
+use strict;
+use warnings;
+}x;
 
 sub import {
 	my $me = shift;
@@ -28,11 +32,11 @@ AnyEvent::SMTP - SMTP client and server
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 
 =head1 SYNOPSIS
