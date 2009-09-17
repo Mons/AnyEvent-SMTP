@@ -59,7 +59,7 @@ sub command {
 	warn ">> $write  " if $self->{debug};
 	$self->{h}->push_write("$write$NL");
 	#$self->{h}->timeout( $self->{select_timeout} );
-	warn "<? read  " if $self->{debug};
+	warn "<? read  " if $self->{debug} and $self->{debug} > 1;
 	$self->{h}->push_read( regex => $QRNL, sub {
 		local *__ANON__ = 'conn.command.read';
 		shift;
@@ -82,7 +82,7 @@ sub line {
 	my %args = @_;
 	$args{ok} = '250' unless defined $args{ok};
 	$args{cb} or return $self->event( error => "no cb for command at @{[ (caller)[1,2] ]}" );
-	warn "<? read  " if $self->{debug};
+	warn "<? read  " if $self->{debug} and $self->{debug} > 1;
 	$self->{h}->push_read( regex => $QRNL, sub {
 		local *__ANON__ = 'conn.line.read';
 		shift;
