@@ -5,6 +5,12 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.07    2011-09-20
+        * #66582 multiple responses to invalid MAIL and RCPT commands.
+        * #66581: typo in smtp command 'help'
+        * #65579: Can't call method "reply" on unblessed reference
+        * #66580: recipient validation
+
 0.06    2009-08-26
         * Try to cheat with cpants game ;) (At all common::sense is a strict)
 

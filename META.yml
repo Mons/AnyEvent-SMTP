@@ -1,25 +1,32 @@
 ---
 abstract: 'SMTP client and server'
 author:
+  - 'Mons Anderson, C<< <mons at cpan.org> >>'
   - 'Mons Anderson <mons@cpan.org>'
 build_requires:
+  ExtUtils::MakeMaker: 6.42
   Test::More: 0
   lib::abs: 0.90
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.71'
+generated_by: 'Module::Install version 1.00'
 license: perl
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.3.html
-  version: 1.3
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 name: AnyEvent-SMTP
 no_index:
   directory:
     - inc
     - t
+    - xt
 requires:
   AnyEvent: 4.82
   Mail::Address: 0
   Object::Event: 1.0
   Sys::Hostname: 0
   common::sense: 0
-version: 0.06
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.07

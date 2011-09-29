@@ -11,6 +11,7 @@ my $cv = AnyEvent->condvar;
 
 smtp_server undef, 2525, sub {
 	warn "MAIL=".Dumper shift;
+	die;
 };
 
 $cv->recv;

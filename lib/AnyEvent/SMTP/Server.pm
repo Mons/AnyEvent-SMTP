@@ -42,7 +42,17 @@ our %CMD = map { $_ => 1 } qw( HELO EHLO MAIL RCPT QUIT DATA EXPN VRFY NOOP HELP
     
     use AnyEvent::SMTP::Server;
     
-    my $server = AnyEvent::SMTP::Server->new( port => 2525 );
+    my $server = AnyEvent::SMTP::Server->new(
+        port => 2525,
+        mail_validate => sub {
+            my ($m,$addr) = @_;
+            if ($good) { return 1 } else { return 0, 513, 'Bad sender.' }
+        },
+        rcpt_validate => sub {
+            my ($m,$addr) = @_;
+            if ($good) { return 1 } else { return 0, 513, 'Bad recipient.' }
+        },
+    );
 
     $server->reg_cb(
         client => sub {
@@ -161,8 +171,14 @@ sub new {
 	$self->{hostname} = hostname() unless defined $self->{hostname};
 	$self->set_exception_cb( sub {
 		my ($e, $event, @args) = @_;
-		my $con;
-		{
+		my $ex = $@;
+		if (exists $self->{event_failed}) {
+			$self->{event_failed} = $ex;
+			return;
+		}
+		#warn "exception: $self, $self->{current_con} (@args) [$@]";
+		my $con = $self->{current_con};
+		if (!$con) {
 			local $::self = $self;
 			local $::con;
 			local $::event = $event;
@@ -170,9 +186,9 @@ sub new {
 				package DB;
 				my $i = 0;
 				while (my @c = caller(++$i)) {
-					#warn "$i. [@DB::args]";
-					next if @DB::args < 1;
-					last if $DB::args[0] == $::self and $DB::args[1] eq $::event;
+					warn "$i. [@DB::args]";
+					next if @DB::args < 2;
+					last if $DB::args[0] == $::self and $DB::args[1] eq $::event and UNIVERSAL::isa($DB::args[2], 'AnyEvent::SMTP::Conn');
 				}
 				$::con = $DB::args[2];
 			}
@@ -181,13 +197,13 @@ sub new {
 		if ($con) {
 			my $msg = "500 INTERNAL ERROR";
 			if ($self->{devel}) {
-				$e =~ s{(?:\r?\n)+}{ }sg;
-				$e =~ s{\s+$}{}s;
-				$msg .= ": ".$e;
+				$ex =~ s{(?:\r?\n)+}{ }sg;
+				$ex =~ s{\s+$}{}s;
+				$msg .= ": ".$ex;
 			}
 			$con->reply($msg);
 		}
-		warn "exception during $event : $e";
+		warn "exception during $event : $ex";
 	} );
 	$self->reg_cb(
 		command => sub {
@@ -227,20 +243,28 @@ sub new {
 		MAIL => sub {
 			my ($s,$con,@args) = @_;
 			my $from = join ' ',@args;
-			$from =~ s{^from:}{}i or $con->reply('501 Usage: MAIL FROM:<mail addr>');
+			$from =~ s{^from:}{}i or return $con->reply('501 Usage: MAIL FROM:<mail addr>');
 			$con->{helo} or return $con->reply("503 Error: send HELO/EHLO first");
 			my @addrs = map { $_->address } Mail::Address->parse($from);
-			@addrs == 1 or $con->reply('501 Usage: MAIL FROM:<mail addr>');
+			@addrs == 1 or return $con->reply('501 Usage: MAIL FROM:<mail addr>');
+			if ($self->{mail_validate}) {
+				my ($res,$err,$errstr) = $self->{mail_validate}->($con->{m}, $addrs[0]);
+				$res or return $con->reply("$err $errstr");
+			}
 			$con->{m}{from} = $addrs[0];
 			$con->ok;
 		},
 		RCPT => sub {
 			my ($s,$con,@args) = @_;
 			my $to = join ' ',@args;
-			$to =~ s{^to:}{}i or $con->reply('501 Usage: RCPT TO:<mail addr>');
+			$to =~ s{^to:}{}i or return $con->reply('501 Usage: RCPT TO:<mail addr>');
 			$con->{m}{from} or return $con->reply("503 Error: need MAIL command");
 			my @addrs = map { $_->address } Mail::Address->parse($to);
-			@addrs or $con->reply('501 Usage: RCPT TO:<mail addr>');
+			@addrs or return $con->reply('501 Usage: RCPT TO:<mail addr>');
+			if ($self->{rcpt_validate}) {
+				my ($res,$err,$errstr) = $self->{rcpt_validate}->($con->{m}, $addrs[0]);
+				$res or return $con->reply("$err $errstr");
+			}
 			push @{ $con->{m}{to} ||= [] }, $addrs[0];
 			$con->ok;
 		},
@@ -251,8 +275,14 @@ sub new {
 			$con->reply("354 End data with <CR><LF>.<CR><LF>");
 			$con->data(cb => sub {
 				$con->{m}{data} = shift;
+				local $s->{event_failed} = 0;
+				local $s->{current_con} = $con;
 				$s->event( mail => delete $con->{m} );
-				$con->ok("I'll take it");
+				if ($s->{event_failed}) {
+					$con->reply("500 Internal Server Error");
+				} else {
+					$con->ok("I'll take it");
+				}
 			});
 		},
 		QUIT => sub {
@@ -261,7 +291,7 @@ sub new {
 			$con->close;
 			return;
 		},
-		HELP => sub { $_[1]->reply("214 Ho help available.") },
+		HELP => sub { $_[1]->reply("214 No help available.") },
 		NOOP => sub { $_[1]->reply("252 Ok.") },
 		EXPN => sub { $_[1]->reply("252 Nice try.") },
 		VRFY => sub { $_[1]->reply("252 Nice try.") },

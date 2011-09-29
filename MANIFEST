@@ -1,4 +1,3 @@
-.cvsignore
 Changes
 ex/client.pl
 ex/server-fnc.pl
@@ -25,6 +24,7 @@ META.yml
 README
 t/00-load.t
 t/30-server-func.t
+t/35-server-die.t
 t/40-client.t
 t/50-slots-maxcon.t
 t/51-slots-maxcon-host.t
@@ -37,3 +37,4 @@ t/98-fixme.t
 t/99-kwalitee.t
 t/pod-coverage.t
 t/pod.t
+xt/telnet.txt

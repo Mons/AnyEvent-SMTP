@@ -1,13 +1,10 @@
 NAME
     AnyEvent::SMTP - SMTP client and server
 
-VERSION
-    Version 0.06
-
 SYNOPSIS
         use AnyEvent::SMTP 'sendmail';
 
-    sendmail
+        sendmail
         from => 'mons@cpan.org',
         to   => 'mons@cpan.org', # SMTP host will be detected from addres by MX record
         data => 'Test message '.time().' '.$$,

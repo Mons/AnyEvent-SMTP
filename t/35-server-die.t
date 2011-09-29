@@ -24,7 +24,9 @@ unless($child = fork) {
 	# Start server and wait for connections
 	my $cv = AnyEvent->condvar;
 	my $req = 2;
-	smtp_server undef, $port, sub {};
+	smtp_server undef, $port, sub {
+		die;
+	};
 	$cv->recv;
 } else {
 	# Wait for server to start
@@ -46,28 +48,19 @@ unless($child = fork) {
 	$cv->recv;
 }
 
-plan tests => 15;
+plan tests => 7;
 
 SKIP:
 for (['S1', Host => 'localhost:'.$port, AutoHello => 1]) {
 	my $n = $_->[0];
 	my $client = Test::SMTP->connect_ok(@$_) or skip 'Not connected',12;
 	#$client->auth_ko(1,2,3,'auth');
-	$client->mail_from_ok('mons@rambler-co.ru', 'Mail from');
-	$client->rcpt_to_ok('mons@rambler-co.ru', 'Rcpt to');
-	$client->rset_ok('Rset');
-
+	
 	$client->mail_from_ok('mons@rambler-co.ru', 'Mail from');
 	$client->rcpt_to_ok('mons@rambler-co.ru', 'Rcpt to');
 	$client->rcpt_to_ok('makc@rambler-co.ru', 'Rcpt to');
 	$client->data_ok('Data');
-	$client->dataend_ok('.');
-
-	$client->mail_from_ok('mons@rambler-co.ru', 'Mail from');
-	$client->rcpt_to_ok('mons@rambler-co.ru', 'Rcpt to');
-	$client->rcpt_to_ok('makc@rambler-co.ru', 'Rcpt to');
-	$client->data_ok('Data');
-	$client->dataend_ok('.');
+	$client->dataend_ko('. failed because of die');
 
 	$client->quit_ok('Quit OK');
 }

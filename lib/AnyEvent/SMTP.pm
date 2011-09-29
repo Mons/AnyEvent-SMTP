@@ -30,13 +30,9 @@ sub import {
 
 AnyEvent::SMTP - SMTP client and server
 
-=head1 VERSION
-
-Version 0.06
-
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 
 =head1 SYNOPSIS
