@@ -5,6 +5,11 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.08    2011-11-21
+        * Add information about remote host/port
+        * Add more complex example to show capabilities of validation
+        * Add ready event to notify when server started
+
 0.07    2011-09-20
         * #66582 multiple responses to invalid MAIL and RCPT commands.
         * #66581: typo in smtp command 'help'

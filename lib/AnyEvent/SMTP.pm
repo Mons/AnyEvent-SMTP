@@ -2,6 +2,7 @@ package AnyEvent::SMTP;
 
 use AnyEvent;
 use common::sense;
+use 5.008008;
 m{# trying to cheat with cpants game ;)
 use strict;
 use warnings;
@@ -32,7 +33,7 @@ AnyEvent::SMTP - SMTP client and server
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 
 =head1 SYNOPSIS
@@ -71,7 +72,7 @@ Mons Anderson, C<< <mons at cpan.org> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 Mons Anderson, all rights reserved.
+Copyright 2009-2011 Mons Anderson, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

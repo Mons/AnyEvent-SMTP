@@ -16,6 +16,7 @@ requires 'Sys::Hostname';
 requires 'Mail::Address';
 
 auto_install;
+auto_provides;
 
 WriteAll;
 

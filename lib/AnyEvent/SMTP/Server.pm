@@ -112,6 +112,10 @@ Closes all opened connections and shutdown server
 
 =over 4
 
+=item ready()
+
+Invoked when server is ready
+
 =item client($connection)
 
 Invoked when client connects
@@ -128,6 +132,9 @@ Invoked when server received complete mail message
         from => ...,
         to   => [ ... ],
         data => '...',
+        host => 'remote addr',
+        port => 'remote port',
+        helo => 'HELO/EHLO string',
     };
 
 =back
@@ -226,18 +233,18 @@ sub new {
 		HELO => sub {
 			my ($s,$con,@args) = @_;
 			$con->{helo} = "@args";
-			$con->{m} = {};
+			$con->new_m();
 			$con->ok("I'm ready.");
 		},
 		EHLO => sub {
 			my ($s,$con,@args) = @_;
 			$con->{helo} = "@args";
-			$con->{m} = {};
+			$con->new_m();
 			$con->ok("Go on.");
 		},
 		RSET => sub {
 			my ($s,$con,@args) = @_;
-			$con->{m} = {};
+			$con->new_m();
 			$con->ok;
 		},
 		MAIL => sub {
@@ -320,13 +327,21 @@ sub start {
 			return;
 		}
 		$self->accept_connection(@_);
+	}, sub {
+		my ($sock,$host,$port) = @_;
+		$self->{sock} = $sock;
+		$self->{host} = $host unless defined $self->{host};
+		$self->{port} = $port unless defined $self->{port};
+		warn "Server started on port $self->{port}\n" if $self->{debug};
+		$self->event(ready => ());
+		return undef;
 	};
-	warn "Server started on port $self->{port}\n" if $self->{debug};
+	
 }
 
 sub accept_connection {
 	my ($self,$fh,$host,$port) = @_;
-	#print "Client connected $host:$port\n";
+	warn "Client connected $host:$port \n" if $self->{debug};
 	my $con = AnyEvent::SMTP::Conn->new(
 		fh => $fh,
 		host => $host,

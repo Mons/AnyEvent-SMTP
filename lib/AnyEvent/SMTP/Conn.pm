@@ -146,4 +146,8 @@ sub data {
 
 }
 
+sub new_m {
+	my $self = shift;
+	$self->{m} = { host => $self->{host}, port => $self->{port}, helo => $self->{helo}, @_ };
+}
 1;
