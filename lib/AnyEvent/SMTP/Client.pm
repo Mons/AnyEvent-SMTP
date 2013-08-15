@@ -348,7 +348,11 @@ sub sendmail(%) {
 		for my $domain (keys %domains) {
 			$cv->begin;
 			$dns->resolve( $domain => mx => sub {
-				@_ = map $_->[4], sort { $a->[3] <=> $b->[3] } @_;
+				if ($AnyEvent::VERSION > 6.0) {
+					@_ = map $_->[5], sort { $a->[4] <=> $b->[4] } @_;
+				} else {
+					@_ = map $_->[4], sort { $a->[3] <=> $b->[3] } @_;
+				}
 				warn "MX($domain) = [ @_ ]\n" if $args{debug};
 				if (@_) {
 					$run->(shift, $args{port}, @{ delete $domains{$domain} });

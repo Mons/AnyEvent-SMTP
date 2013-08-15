@@ -5,6 +5,9 @@ TODO: More capabilities for Client
 TODO: Authorization for Client
 TODO: TLS
 
+0.09    2013-02-12
+        * And nobody tells me, that since 6.01 MX resolving became broken ;) Fixed.
+
 0.08    2011-11-21
         * Add information about remote host/port
         * Add more complex example to show capabilities of validation

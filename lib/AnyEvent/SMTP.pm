@@ -33,7 +33,7 @@ AnyEvent::SMTP - SMTP client and server
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 
 =head1 SYNOPSIS
