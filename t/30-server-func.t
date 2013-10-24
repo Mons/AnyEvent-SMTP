@@ -29,6 +29,7 @@ unless($child = fork) {
 } else {
 	# Wait for server to start
 	my $cv = AnyEvent->condvar;
+	sleep 0.1;
 	my ($conn,$cg);
 	$cv->begin(sub {
 		undef $conn;
@@ -38,7 +39,7 @@ unless($child = fork) {
 	$conn = sub {
 		$cg = tcp_connect '127.0.0.1',$port, sub {
 			return $cv->end if @_;
-			$! == 61 or plan skip_all => "Bad response from server connect: $!"; 
+			$!{ENODATA} or $!{ECONNREFUSED} or plan skip_all => "Bad response from server connect: [".(0+$!)."] $!"; 
 			my $t;$t = AnyEvent->timer( after => 0.05, cb => sub { undef $t; $conn->() } );
 		};
 	};
@@ -56,7 +57,7 @@ for (['S1', Host => 'localhost:'.$port, AutoHello => 1]) {
 	$client->mail_from_ok('mons@rambler-co.ru', 'Mail from');
 	$client->rcpt_to_ok('mons@rambler-co.ru', 'Rcpt to');
 	$client->rset_ok('Rset');
-
+	
 	$client->mail_from_ok('mons@rambler-co.ru', 'Mail from');
 	$client->rcpt_to_ok('mons@rambler-co.ru', 'Rcpt to');
 	$client->rcpt_to_ok('makc@rambler-co.ru', 'Rcpt to');

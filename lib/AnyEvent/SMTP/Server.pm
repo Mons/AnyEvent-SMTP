@@ -74,7 +74,7 @@ our %CMD = map { $_ => 1 } qw( HELO EHLO MAIL RCPT QUIT DATA EXPN VRFY NOOP HELP
         },
         mail => sub {
             my ($s,$mail) = @_;
-            warn "Received mail from $mail->{from} to $mail->{to}\n$mail->{data}\n";
+            warn "Received mail from ($mail->{host}:$mail->{port}) $mail->{from} to $mail->{to}\n$mail->{data}\n";
         },
     );
 

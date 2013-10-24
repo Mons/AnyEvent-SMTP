@@ -6,7 +6,6 @@ use warnings;
 use AnyEvent::Impl::Perl;
 use AnyEvent;
 use AnyEvent::Socket;
-
 use lib::abs '../lib';
 
 use Test::More;
@@ -40,7 +39,7 @@ unless($child = fork) {
 	$conn = sub {
 		$cg = tcp_connect '127.0.0.1',$port, sub {
 			return $cv->end if @_;
-			$! == 61 or plan skip_all => "Bad response from server connect: $!"; 
+			$!{ENODATA} or $!{ECONNREFUSED} or plan skip_all => "Bad response from server connect: [".(0+$!)."] $!"; 
 			my $t;$t = AnyEvent->timer( after => 0.05, cb => sub { undef $t; $conn->() } );
 		};
 	};
