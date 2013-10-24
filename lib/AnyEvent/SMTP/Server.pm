@@ -252,8 +252,13 @@ sub new {
 			my $from = join ' ',@args;
 			$from =~ s{^from:}{}i or return $con->reply('501 Usage: MAIL FROM:<mail addr>');
 			$con->{helo} or return $con->reply("503 Error: send HELO/EHLO first");
-			my @addrs = map { $_->address } Mail::Address->parse($from);
-			@addrs == 1 or return $con->reply('501 Usage: MAIL FROM:<mail addr>');
+			my @addrs;
+			if ($from !~ /^\s*<>\s*$/) {
+				@addrs = map { $_->address } Mail::Address->parse($from);
+				@addrs == 1 or return $con->reply('501 Usage: MAIL FROM:<mail addr>');
+			} else {
+				@addrs = ('');
+			}
 			if ($self->{mail_validate}) {
 				my ($res,$err,$errstr) = $self->{mail_validate}->($con->{m}, $addrs[0]);
 				$res or return $con->reply("$err $errstr");
