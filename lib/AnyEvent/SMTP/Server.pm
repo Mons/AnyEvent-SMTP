@@ -334,7 +334,7 @@ sub start {
 		$self->accept_connection(@_);
 	}, sub {
 		my ($sock,$host,$port) = @_;
-		$self->{sock} = $sock;
+		#$self->{sock} = $sock;
 		$self->{host} = $host unless defined $self->{host};
 		$self->{port} = $port unless defined $self->{port};
 		warn "Server started on port $self->{port}\n" if $self->{debug};
