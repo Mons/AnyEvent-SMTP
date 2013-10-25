@@ -279,7 +279,7 @@ sub new {
 			my ($s,$con,@args) = @_;
 			my $to = join ' ',@args;
 			$to =~ s{^to:}{}i or return $con->reply('501 Usage: RCPT TO:<mail addr>');
-			$con->{m}{from} or return $con->reply("503 Error: need MAIL command");
+			defined $con->{m}{from} or return $con->reply("503 Error: need MAIL command");
 			my @addrs = map { $_->address } Mail::Address->parse($to);
 			@addrs or return $con->reply('501 Usage: RCPT TO:<mail addr>');
 			if ($self->{rcpt_validate}) {
@@ -291,7 +291,7 @@ sub new {
 		},
 		DATA => sub {
 			my ($s,$con) = @_;
-			$con->{m}{from} or return $con->reply("503 Error: need MAIL command");
+			defined $con->{m}{from} or return $con->reply("503 Error: need MAIL command");
 			$con->{m}{to}   or return $con->reply("554 Error: need RCPT command");
 			$con->reply("354 End data with <CR><LF>.<CR><LF>");
 			$con->data(cb => sub {
